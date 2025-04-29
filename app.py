@@ -20,7 +20,7 @@ with col2:
     st.header('Students Dropout Prediction (Prototype)')
 
 # 1. Load the OneHotEncoder
-onehot_encoder = joblib.load('onehot_encoder.joblib')  # Replace with your file path
+onehot_encoder = joblib.load('/content/model/onehot_encoder.joblib') 
 
 # 2. Get Feature Names (Correct Method)
 feature_names = onehot_encoder.get_feature_names_out(['Marital_status', 'Course', 'Previous_qualification'])
