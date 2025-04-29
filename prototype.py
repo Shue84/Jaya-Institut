@@ -88,8 +88,6 @@ def prediction(data):
     final_result = result_target.inverse_transform(result)[0]
     return final_result
 
-!pip install streamlit -q
-
 import streamlit as st
 
 col1, col2 = st.columns([1, 5])
