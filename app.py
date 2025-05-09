@@ -247,7 +247,7 @@ with col2:
         151: 'personal service workers',
         152: 'Sellers',
         153: 'Personal care workers and the like',
-        171: 'Skilled construction workers and the like, except electricians'.
+        171: 'Skilled construction workers and the like, except electricians',
         173: 'Skilled workers in printing, precision instrument manufacturing, jewelers, artisans and the like',
         175: 'Workers in food processing, woodworking, clothing and other industries and crafts',
         191: 'cleaning workers',
