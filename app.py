@@ -294,6 +294,8 @@ with col2:
 with st.expander("View the Raw Data"):
     st.dataframe(data=data, width=800, height=10)
 
+st.write("Raw input data:", data)
+
 if st.button('Predict'):
     new_data = data_preprocessing(data=data)
     with st.expander("View the Preprocessed Data"):
