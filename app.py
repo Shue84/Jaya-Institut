@@ -83,7 +83,7 @@ with col3:
     }
     scholarship_reverse_map = {v: k for k, v in scholarship_map.items()}
     scholarship_label = st.selectbox('Scholarship_holder', options=list(scholarship_map.values()), index=1)
-    data["Scholarship_holder"] = Scholarship_reverse_map[scholarship_label]
+    data["Scholarship_holder"] = scholarship_reverse_map[scholarship_label]
 
 
 col1, col2 = st.columns(2)
