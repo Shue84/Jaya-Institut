@@ -309,6 +309,6 @@ if st.button('Predict'):
     with st.expander("View the Preprocessed Data"):
         st.dataframe(data=new_data, width=800, height=10)
 
-    prediction_value = prediction(new_data)[0] # Assuming your prediction function returns a list or array
+    prediction_value = prediction(new_data)
     predicted_status = status_map.get(prediction_value, 'Unknown') # Get the word, default to 'Unknown' if not found
     st.write(f"Status: {predicted_status}")
