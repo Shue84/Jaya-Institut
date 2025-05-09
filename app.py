@@ -40,7 +40,7 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     Age_at_enrollment = int(st.number_input(label='Age_at_enrollment', value=15))
-    data["Age_at_enrollment"] = [Age_at_enrollment]
+    data_dict["Age_at_enrollment"] = [Age_at_enrollment]
 
 with col2:
     # Define mappings
@@ -53,18 +53,18 @@ with col2:
     # UI dropdown
     gender_label = st.selectbox('Gender', options=list(gender_map.values()), index=1)
     # Assign the corresponding value
-    data["Gender"] = [gender_reverse_map[gender_label]]
+    data_dict["Gender"] = [gender_reverse_map[gender_label]]
 
 with col3:
     Marital_status = st.selectbox('Marital Status', options=marital_status_options)
-    data["Marital_status"] = [Marital_status]
+    data_dict["Marital_status"] = [Marital_status]
 
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     Course = st.selectbox('Course', options=course_options)
-    data["Course"] = [Course]
+    data_dict["Course"] = [Course]
 
 with col2:
     daytime_evening_map = {
@@ -73,7 +73,7 @@ with col2:
     }
     daytime_evening_reverse_map = {v: k for k, v in daytime_evening_map.items()}
     daytime_evening_label = st.selectbox('Daytime_evening_attendance', options=list(daytime_evening_map.values()), index=1)
-    data["Daytime_evening_attendance"] = [daytime_evening_reverse_map[daytime_evening_label]]
+    data_dict["Daytime_evening_attendance"] = [daytime_evening_reverse_map[daytime_evening_label]]
 
 with col3:
     scholarship_map = {
@@ -82,7 +82,7 @@ with col3:
     }
     scholarship_reverse_map = {v: k for k, v in scholarship_map.items()}
     scholarship_label = st.selectbox('Scholarship_holder', options=list(scholarship_map.values()), index=1)
-    data["Scholarship_holder"] = [scholarship_reverse_map[scholarship_label]]
+    data_dict["Scholarship_holder"] = [scholarship_reverse_map[scholarship_label]]
 
 
 col1, col2 = st.columns(2)
@@ -126,7 +126,7 @@ with col1:
     }
     fathers_qualification_reverse_map = {v: k for k, v in fathers_qualification_map.items()}
     fathers_qualification_label = st.selectbox('Fathers_qualification', options=list(fathers_qualification_map.values()), index=1)
-    data["Fathers_qualification"] = [fathers_qualification_reverse_map[fathers_qualification_label]]
+    data_dict["Fathers_qualification"] = [fathers_qualification_reverse_map[fathers_qualification_label]]
 
 with col2:
     mothers_qualification_map = {
@@ -162,7 +162,7 @@ with col2:
     }
     mothers_qualification_reverse_map = {v: k for k, v in mothers_qualification_map.items()}
     mothers_qualification_label = st.selectbox('Mothers_qualification', options=list(mothers_qualification_map.values()), index=1)
-    data["Mothers_qualification"] = [mothers_qualification_reverse_map[mothers_qualification_label]]
+    data_dict["Mothers_qualification"] = [mothers_qualification_reverse_map[mothers_qualification_label]]
 
 col1, col2 = st.columns(2)
 
@@ -217,7 +217,7 @@ with col1:
     }
     fathers_occupation_reverse_map = {v: k for k, v in fathers_occupation_map.items()}
     fathers_occupation_label = st.selectbox('Fathers_occupation', options=list(fathers_occupation_map.values()), index=1)
-    data["Fathers_occupation"] = [fathers_occupation_reverse_map[fathers_occupation_label]]
+    data_dict["Fathers_occupation"] = [fathers_occupation_reverse_map[fathers_occupation_label]]
 
 with col2:
     mothers_occupation_map = {
@@ -256,39 +256,39 @@ with col2:
     }
     mothers_occupation_reverse_map = {v: k for k, v in mothers_occupation_map.items()}
     mothers_occupation_label = st.selectbox('Mothers_occupation', options=list(mothers_occupation_map.values()), index=1)
-    data["Mothers_occupation"] = [mothers_occupation_reverse_map[mothers_occupation_label]]
+    data_dict["Mothers_occupation"] = [mothers_occupation_reverse_map[mothers_occupation_label]]
 
 col1, col2 = st.columns(2)
 
 with col1:
     Previous_qualification = st.selectbox('Previous Qualification', options=qualification_options)
-    data["Previous_qualification"] = [Previous_qualification]
+    data_dict["Previous_qualification"] = [Previous_qualification]
 
 with col2:
     Previous_qualification_grade = int(st.number_input(label='Previous_qualification_grade', value=0))
-    data["Previous_qualification_grade"] = [Previous_qualification_grade]
+    data_dict["Previous_qualification_grade"] = [Previous_qualification_grade]
 
 
 col1, col2 = st.columns(2)
 
 with col1:
     Curricular_units_1st_sem_approved = int(st.number_input(label='Curricular_units_1st_sem_approved', value=0))
-    data["Curricular_units_1st_sem_approved"] = [Curricular_units_1st_sem_approved]
+    data_dict["Curricular_units_1st_sem_approved"] = [Curricular_units_1st_sem_approved]
 
 with col2:
     Curricular_units_2nd_sem_approved = int(st.number_input(label='Curricular_units_2nd_sem_approved', value=0))
-    data["Curricular_units_2nd_sem_approved"] = [Curricular_units_2nd_sem_approved]
+    data_dict["Curricular_units_2nd_sem_approved"] = [Curricular_units_2nd_sem_approved]
 
 
 col1, col2 = st.columns(2)
 
 with col1:
     Curricular_units_1st_sem_grade = int(st.number_input(label='Curricular_units_1st_sem_grade', value=0))
-    data["Curricular_units_1st_sem_grade"] = [Curricular_units_1st_sem_grade]
+    data_dict["Curricular_units_1st_sem_grade"] = [Curricular_units_1st_sem_grade]
 
 with col2:
     Curricular_units_2nd_sem_grade = int(st.number_input(label='Curricular_units_2nd_sem_grade', value=0))
-    data["Curricular_units_2nd_sem_grade"] = [Curricular_units_2nd_sem_grade]
+    data_dict["Curricular_units_2nd_sem_grade"] = [Curricular_units_2nd_sem_grade]
 
 data = pd.DataFrame(data_dict)
 
