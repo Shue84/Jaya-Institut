@@ -204,7 +204,7 @@ with col1:
         154: 'Protection and security services personnel',
         161: 'Market-oriented farmers and skilled agricultural and animal production workers',
         163: 'Farmers, livestock keepers, fishermen, hunters and gatherers, subsistence',
-        171: 'Skilled construction workers and the like, except electricians'.
+        171: 'Skilled construction workers and the like, except electricians',
         172: 'Skilled workers in metallurgy, metalworking and similar',
         174: 'Skilled workers in electricity and electronics',
         175: 'Workers in food processing, woodworking, clothing and other industries and crafts',
