@@ -19,105 +19,285 @@ with col1:
 with col2:
     st.header('Students Dropout Prediction (Prototype)')
 
-# Initialize dictionary to collect user input
-input_dict = {}
+# 1. Load the OneHotEncoder
+onehot_encoder = joblib.load('model/onehot_encoder.joblib')
 
-# Gender mapping
-gender_map = {0: 'Female', 1: 'Male'}
-gender_reverse_map = {v: k for k, v in gender_map.items()}
+# 2. Get Feature Names (Correct Method)
+# Get feature names from the encoder. This is CRUCIAL for consistency.
+try:
+    feature_names = onehot_encoder.get_feature_names_out().tolist()
+except AttributeError:
+    feature_names = onehot_encoder.get_feature_names().tolist()
 
-# Attendance and scholarship
-daytime_evening_map = {0: 'Evening', 1: 'Daytime'}
-daytime_evening_reverse_map = {v: k for k, v in daytime_evening_map.items()}
+# 3. Define Original Categorical Values
+marital_status_options = ['Single', 'Married',  'Widower', 'Divorced', 'Facto Union', 'Legally separated']
+course_options = ['Biofuel Production Technologies', 'Animation and Multimedia Design', 'Social Service (evening attendance)', 'Agronomy', 'Communication Design', 'Veterinary Nursing', 'Informatics Engineering', 'Equinculture', 'Management', 'Social Service', 'Tourism', 'Nursing', 'Oral Hygiene', 'Advertising and Marketing Management', 'Journalism and Communication' 'Basic Education', 'Management (evening attendance)']
+qualification_options = ['Secondary education', 'Higher education - bachelors degree', 'Higher education - degree', 'Higher education - masters', 'Higher education - doctorate', 'Frequency of higher education', '12th year of schooling - not completed', '11th year of schooling - not completed', 'Other - 11th year of schooling', '10th year of schooling', '10th year of schooling - not completed', 'Basic education 3rd cycle (9th/10th/11th year) or equiv.', 'Basic education 2nd cycle (6th/7th/8th year) or equiv.', 'Technological specialization course', 'Higher education - degree (1st cycle)', 'Professional higher technical course', 'Higher education - master (2nd cycle)']
+data = pd.DataFrame()
 
-scholarship_map = {0: 'No', 1: 'Yes'}
-scholarship_reverse_map = {v: k for k, v in scholarship_map.items()}
+data = pd.DataFrame()
 
-# Marital status and course options
-marital_status_options = ['Single', 'Married', 'Widower', 'Divorced', 'Facto Union', 'Legally separated']
-course_map = {
-    '33': 'Computer Science', '171': 'Law', '8014': 'Mechanical Engineering',
-    '9003': 'Civil Engineering', '9070': 'Business Administration', '9085': 'Psychology',
-    '9119': 'Architecture', '9130': 'Education', '9147': 'Economics', '9238': 'Nursing',
-    '9254': 'Pharmacy', '9500': 'Political Science', '9556': 'Sociology', '9670': 'Mathematics',
-    '9773': 'Statistics', '9863': 'Linguistics', '9991': 'Biology'
-}
-course_reverse_map = {v: k for k, v in course_map.items()}
-
-# Qualification map
-qualification_map = {
-    '1': 'Basic Education', '2': 'Secondary Education', '3': 'Technical Course',
-    '4': 'Vocational Training', '5': 'Undergraduate', '6': 'Postgraduate',
-    '9': 'Foreign Qualification', '10': 'High School', '12': 'Middle School',
-    '14': 'Certificate', '15': 'Other', '19': 'Online Course', '38': 'Exchange Program',
-    '39': 'Adult Education', '40': 'Evening School', '42': 'Homeschooling', '43': 'No Formal Education'
-}
-qualification_reverse_map = {v: k for k, v in qualification_map.items()}
-
-# Collect inputs
 col1, col2, col3 = st.columns(3)
+
 with col1:
-    input_dict["Age_at_enrollment"] = int(st.number_input(label='Age at Enrollment', value=15))
+    Age_at_enrollment = int(st.number_input(label='Age_at_enrollment', value=15))
+    data["Age_at_enrollment"] = Age_at_enrollment
 
 with col2:
+    # Define mappings
+    gender_map = {
+        0: 'Female',
+        1: 'Male'
+    }
+    gender_reverse_map = {v: k for k, v in gender_map.items()}
+
+    # UI dropdown
     gender_label = st.selectbox('Gender', options=list(gender_map.values()), index=1)
-    input_dict["Gender"] = gender_reverse_map[gender_label]
+    # Assign the corresponding value
+    data["Gender"] = gender_reverse_map[gender_label]
 
 with col3:
-    input_dict["Marital_status"] = st.selectbox('Marital Status', options=marital_status_options)
+    Marital_status = st.selectbox('Marital Status', options=marital_status_options)
+    data["Marital_status"] = Marital_status
+
 
 col1, col2, col3 = st.columns(3)
+
 with col1:
-    course_label = st.selectbox('Course', list(course_map.values()))
-    input_dict["Course"] = course_reverse_map[course_label]
+    Course = st.selectbox('Course', options=course_options)
+    data["Course"] = Course
 
 with col2:
-    attendance_label = st.selectbox('Daytime or Evening Attendance', list(daytime_evening_map.values()), index=1)
-    input_dict["Daytime_evening_attendance"] = daytime_evening_reverse_map[attendance_label]
+    daytime_evening_map = {
+        0: 'Evening',
+        1: 'Daytime'
+    }
+    daytime_evening_reverse_map = {v: k for k, v in daytime_evening_map.items()}
+    daytime_evening_label = st.selectbox('Daytime_evening_attendance', options=list(daytime_evening_map.values()), index=1)
+    data["Daytime_evening_attendance"] = daytime_evening_reverse_map[daytime_evening_label]
 
 with col3:
-    scholarship_label = st.selectbox('Scholarship Holder', list(scholarship_map.values()), index=1)
-    input_dict["Scholarship_holder"] = scholarship_reverse_map[scholarship_label]
+    scholarship_map = {
+        0: 'No',
+        1: 'Yes'
+    }
+    scholarship_reverse_map = {v: k for k, v in scholarship_map.items()}
+    scholarship_label = st.selectbox('Scholarship_holder', options=list(scholarship_map.values()), index=1)
+    data["Scholarship_holder"] = scholarship_reverse_map[scholarship_label]
+
 
 col1, col2 = st.columns(2)
+
 with col1:
-    qual_label = st.selectbox('Previous Qualification', list(qualification_map.values()))
-    input_dict["Previous_qualification"] = qualification_reverse_map[qual_label]
+    fathers_qualification_map = {
+        1: 'Secondary education',
+        2: 'Higher education - bachelors degree',
+        3: 'Higher education - degree',
+        4: 'Higher education - masters',
+        5: 'Higher education - doctorate',
+        6: 'Frequency of higher education',
+        9: '12th year of schooling - not completed',
+        10: '11th year of schooling - not completed',
+        11: '7th Year (Old)',
+        12: 'Other - 11th year of schooling',
+        13: '2nd year complementary high school course',
+        14: '10th year of schooling',
+        18: 'General commerce course',
+        19: 'Basic Education 3rd Cycle (9th/10th/11th Year) or Equiv.',
+        20: 'Complementary High School Course',
+        22: 'Technical-professional course',
+        25: 'school course',
+        26: '7th year of schooling',
+        27: '2nd cycle of the general high school course',
+        29: '9th Year of Schooling - Not Completed',
+        30: '8th year of schooling',
+        31: 'General Course of Administration and Commerce',
+        33: 'Supplementary Accounting and Administration',
+        34: 'Unknown',
+        35: 'Cant read or write',
+        36: 'Can read without having a 4th year of schooling',
+        37: 'Basic education 1st cycle (4th/5th year) or equiv.',
+        38: 'Basic education 2nd cycle (6th/7th/8th year) or equiv.',
+        39: 'Technological specialization course',
+        40: 'Higher education - degree (1st cycle)',
+        41: 'Specialized higher studies course',
+        42: 'Professional higher technical course',
+        43: 'Higher education - master (2nd cycle)',
+        44: 'Higher Education - Doctorate (3rd cycle)'
+    }
+    fathers_qualification_reverse_map = {v: k for k, v in fathers_qualification_map.items()}
+    fathers_qualification_label = st.selectbox('Fathers_qualification', options=list(fathers_qualification_map.values()), index=1)
+    data["Fathers_qualification"] = fathers_qualification_reverse_map[fathers_qualification_label]
 
 with col2:
-    input_dict["Previous_qualification_grade"] = int(st.number_input(label='Previous Qualification Grade', value=0))
+    mothers_qualification_map = {
+        1: 'Secondary education',
+        2: 'Higher education - bachelors degree',
+        3: 'Higher education - degree',
+        4: 'Higher education - masters',
+        5: 'Higher education - doctorate',
+        6: 'Frequency of higher education',
+        9: '12th year of schooling - not completed',
+        10: '11th year of schooling - not completed',
+        11: '7th Year (Old)',
+        12: 'Other - 11th year of schooling',
+        14: '10th year of schooling',
+        18: 'General commerce course',
+        19: 'Basic Education 3rd Cycle (9th/10th/11th Year) or Equiv.',
+        22: 'Technical-professional course',
+        26: '7th year of schooling',
+        27: '2nd cycle of the general high school course',
+        29: '9th Year of Schooling - Not Completed',
+        30: '8th year of schooling',
+        34: 'Unknown',
+        35: 'Cant read or write',
+        36: 'Can read without having a 4th year of schooling',
+        37: 'Basic education 1st cycle (4th/5th year) or equiv.',
+        38: 'Basic education 2nd cycle (6th/7th/8th year) or equiv.',
+        39: 'Technological specialization course',
+        40: 'Higher education - degree (1st cycle)',
+        41: 'Specialized higher studies course',
+        42: 'Professional higher technical course',
+        43: 'Higher education - master (2nd cycle)',
+        44: 'Higher Education - Doctorate (3rd cycle)'
+    }
+    mothers_qualification_reverse_map = {v: k for k, v in mothers_qualification_map.items()}
+    mothers_qualification_label = st.selectbox('Mothers_qualification', options=list(mothers_qualification_map.values()), index=1)
+    data["Mothers_qualification"] = mothers_qualification_reverse_map[mothers_qualification_label]
 
 col1, col2 = st.columns(2)
+
 with col1:
-    input_dict["Curricular_units_1st_sem_approved"] = int(st.number_input(label='1st Sem Units Approved', value=0))
+    fathers_occupation_map = {
+        0: 'Student',
+        1: 'Representatives of the Legislative Power and Executive Bodies, Directors, Directors and Executive Managers',
+        2: 'Specialists in Intellectual and Scientific Activities',
+        3: 'Intermediate Level Technicians and Professions',
+        4: 'Administrative staff',
+        5: 'Personal Services, Security and Safety Workers and Sellers',
+        6: 'Farmers and Skilled Workers in Agriculture, Fisheries and Forestry',
+        7: 'Skilled Workers in Industry, Construction and Craftsmen',
+        8: 'Installation and Machine Operators and Assembly Workers',
+        9: 'Unskilled Workers',
+        10: 'Armed Forces Professions',
+        90: 'Other situation',
+        99: 'Unknown',
+        101: 'Armed Forces Officers',
+        102: 'Armed Forces Sergeants',
+        103: 'Other Armed Forces personnel',
+        112: 'Directors of administrative and commercial services',
+        114: 'Hotel, catering, trade and other services directors',
+        121: 'Specialists in the physical sciences, mathematics, engineering and related techniques',
+        122: 'Health professionals',
+        123: 'Teachers',
+        124: 'Specialists in finance, accounting, administrative organization, public and commercial relations',
+        131: 'Intermediate level science and engineering technicians and professions',
+        132: 'Technicians and professionals, of intermediate level of health',
+        134: 'Intermediate level technicians from legal, social, sports, cultural and similar services',
+        135: 'Information and communication technology technicians',
+        141: 'Office workers, secretaries in general and data processing operators',
+        143: 'Data, accounting, statistical, financial services and registry-related operators',
+        144: 'Other administrative support staff',
+        151: 'personal service workers',
+        152: 'Sellers',
+        153: 'Personal care workers and the like',
+        154: 'Protection and security services personnel',
+        161: 'Market-oriented farmers and skilled agricultural and animal production workers',
+        163: 'Farmers, livestock keepers, fishermen, hunters and gatherers, subsistence',
+        171: 'Skilled construction workers and the like, except electricians',
+        172: 'Skilled workers in metallurgy, metalworking and similar',
+        174: 'Skilled workers in electricity and electronics',
+        175: 'Workers in food processing, woodworking, clothing and other industries and crafts',
+        181: 'Fixed plant and machine operators',
+        182: 'assembly workers',
+        183: 'Vehicle drivers and mobile equipment operators',
+        192: 'Unskilled workers in agriculture, animal production, fisheries and forestry',
+        193: 'Unskilled workers in extractive industry, construction, manufacturing and transport',
+        194: 'Meal preparation assistants',
+        195: 'Street vendors (except food) and street service providers'
+    }
+    fathers_occupation_reverse_map = {v: k for k, v in fathers_occupation_map.items()}
+    fathers_occupation_label = st.selectbox('Fathers_occupation', options=list(fathers_occupation_map.values()), index=1)
+    data["Fathers_occupation"] = fathers_occupation_reverse_map[fathers_occupation_label]
+
 with col2:
-    input_dict["Curricular_units_2nd_sem_approved"] = int(st.number_input(label='2nd Sem Units Approved', value=0))
+    mothers_occupation_map = {
+        0: 'Student',
+        1: 'Representatives of the Legislative Power and Executive Bodies, Directors, Directors and Executive Managers',
+        2: 'Specialists in Intellectual and Scientific Activities',
+        3: 'Intermediate Level Technicians and Professions',
+        4: 'Administrative staff',
+        5: 'Personal Services, Security and Safety Workers and Sellers',
+        6: 'Farmers and Skilled Workers in Agriculture, Fisheries and Forestry',
+        7: 'Skilled Workers in Industry, Construction and Craftsmen',
+        8: 'Installation and Machine Operators and Assembly Workers',
+        9: 'Unskilled Workers',
+        10: 'Armed Forces Professions',
+        90: 'Other situation',
+        99: 'Unknown',
+        122: 'Health professionals',
+        123: 'Teachers',
+        125: 'Specialists in information and communication technologies (ICT)',
+        131: 'Intermediate level science and engineering technicians and professions',
+        132: 'Technicians and professionals, of intermediate level of health',
+        134: 'Intermediate level technicians from legal, social, sports, cultural and similar services',
+        141: 'Office workers, secretaries in general and data processing operators',
+        143: 'Data, accounting, statistical, financial services and registry-related operators',
+        144: 'Other administrative support staff',
+        151: 'personal service workers',
+        152: 'Sellers',
+        153: 'Personal care workers and the like',
+        171: 'Skilled construction workers and the like, except electricians',
+        173: 'Skilled workers in printing, precision instrument manufacturing, jewelers, artisans and the like',
+        175: 'Workers in food processing, woodworking, clothing and other industries and crafts',
+        191: 'cleaning workers',
+        192: 'Unskilled workers in agriculture, animal production, fisheries and forestry',
+        193: 'Unskilled workers in extractive industry, construction, manufacturing and transport',
+        194: 'Meal preparation assistants',
+    }
+    mothers_occupation_reverse_map = {v: k for k, v in mothers_occupation_map.items()}
+    mothers_occupation_label = st.selectbox('Mothers_occupation', options=list(mothers_occupation_map.values()), index=1)
+    data["Mothers_occupation"] = mothers_occupation_reverse_map[mothers_occupation_label]
 
 col1, col2 = st.columns(2)
-with col1:
-    input_dict["Curricular_units_1st_sem_grade"] = int(st.number_input(label='1st Sem Grade', value=0))
-with col2:
-    input_dict["Curricular_units_2nd_sem_grade"] = int(st.number_input(label='2nd Sem Grade', value=0))
 
-# Convert to DataFrame
-data = pd.DataFrame([input_dict])
+with col1:
+    Previous_qualification = st.selectbox('Previous Qualification', options=qualification_options)
+    data["Previous_qualification"] = Previous_qualification
+
+with col2:
+    Previous_qualification_grade = int(st.number_input(label='Previous_qualification_grade', value=0))
+    data["Previous_qualification_grade"] = Previous_qualification_grade
+
+
+col1, col2 = st.columns(2)
+
+with col1:
+    Curricular_units_1st_sem_approved = int(st.number_input(label='Curricular_units_1st_sem_approved', value=0))
+    data["Curricular_units_1st_sem_approved"] = Curricular_units_1st_sem_approved
+
+with col2:
+    Curricular_units_2nd_sem_approved = int(st.number_input(label='Curricular_units_2nd_sem_approved', value=0))
+    data["Curricular_units_2nd_sem_approved"] = Curricular_units_2nd_sem_approved
+
+
+col1, col2 = st.columns(2)
+
+with col1:
+    Curricular_units_1st_sem_grade = int(st.number_input(label='Curricular_units_1st_sem_grade', value=0))
+    data["Curricular_units_1st_sem_grade"] = Curricular_units_1st_sem_grade
+
+with col2:
+    Curricular_units_2nd_sem_grade = int(st.number_input(label='Curricular_units_2nd_sem_grade', value=0))
+    data["Curricular_units_2nd_sem_grade"] = Curricular_units_2nd_sem_grade
 
 with st.expander("View the Raw Data"):
-    st.dataframe(data, width=800)
+    st.dataframe(data=data, width=800, height=10)
+
+st.write("Raw input data:", data)
 
 if st.button('Predict'):
-    new_data = data_preprocessing(data)
+    new_data = data_preprocessing(data=data)
     with st.expander("View the Preprocessed Data"):
-        st.dataframe(new_data, width=800)
-
-    result = prediction(new_data)
-    status_map = {
-        0: 'Enrolled',
-        1: 'Graduate',
-        2: 'Dropout',
-        '0': 'Enrolled',
-        '1': 'Graduate',
-        '2': 'Dropout'
-    }
-    readable_status = status_map.get(result, result)
-    st.write(f"Status: {readable_status}")
+        st.dataframe(data=new_data, width=800, height=10)
+    st.write("Status: {}".format(prediction(new_data)))
