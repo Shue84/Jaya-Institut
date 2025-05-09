@@ -74,7 +74,7 @@ with col2:
     }
     daytime_evening_reverse_map = {v: k for k, v in daytime_evening_map.items()}
     daytime_evening_label = st.selectbox('Daytime_evening_attendance', options=list(daytime_evening_map.values()), index=1)
-    data["Daytime_evening_attendance"] = Daytime_evening_reverse_map[daytime_evening_label]
+    data["Daytime_evening_attendance"] = daytime_evening_reverse_map[daytime_evening_label]
 
 with col3:
     scholarship_map = {
