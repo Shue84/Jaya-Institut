@@ -11,21 +11,21 @@ import joblib
 import numpy as np
 import pandas as pd
 
-encoder_Course_Marital_status_Previous_qualification = joblib.load('/content/model/onehot_encoder.joblib')
-encoder_Daytime_evening_attendance = joblib.load('/content/model/encoder_Daytime_evening_attendance.joblib')
-encoder_Fathers_occupation = joblib.load('/content/model/encoder_Fathers_occupation.joblib')
-encoder_Fathers_qualification = joblib.load('/content/model/encoder_Fathers_qualification.joblib')
-encoder_Gender = joblib.load('/content/model/encoder_Gender.joblib')
-encoder_Mothers_occupation = joblib.load('/content/model/encoder_Mothers_occupation.joblib')
-encoder_Mothers_qualification = joblib.load('/content/model/encoder_Mothers_qualification.joblib')
-encoder_Scholarship_holder = joblib.load('/content/model/encoder_Scholarship_holder.joblib')
-pca_1 = joblib.load('/content/model/pca_1.joblib')
-scaler_Age_at_enrollment = joblib.load('/content/model/scaler_Age_at_enrollment.joblib')
-scaler_Curricular_units_1st_sem_approved = joblib.load('/content/model/scaler_Curricular_units_1st_sem_approved.joblib')
-scaler_Curricular_units_1st_sem_grade = joblib.load('/content/model/scaler_Curricular_units_1st_sem_grade.joblib')
-scaler_Curricular_units_2nd_sem_approved = joblib.load('/content/model/scaler_Curricular_units_2nd_sem_approved.joblib')
-scaler_Curricular_units_2nd_sem_grade = joblib.load('/content/model/scaler_Curricular_units_2nd_sem_grade.joblib')
-scaler_Previous_qualification_grade = joblib.load('/content/model/scaler_Previous_qualification_grade.joblib')
+onehot_encoder = joblib.load('model/onehot_encoder.joblib')
+encoder_Daytime_evening_attendance = joblib.load('model/encoder_Daytime_evening_attendance.joblib')
+encoder_Fathers_occupation = joblib.load('model/encoder_Fathers_occupation.joblib')
+encoder_Fathers_qualification = joblib.load('model/encoder_Fathers_qualification.joblib')
+encoder_Gender = joblib.load('model/encoder_Gender.joblib')
+encoder_Mothers_occupation = joblib.load('model/encoder_Mothers_occupation.joblib')
+encoder_Mothers_qualification = joblib.load('model/encoder_Mothers_qualification.joblib')
+encoder_Scholarship_holder = joblib.load('model/encoder_Scholarship_holder.joblib')
+pca_1 = joblib.load('model/pca_1.joblib')
+scaler_Age_at_enrollment = joblib.load('model/scaler_Age_at_enrollment.joblib')
+scaler_Curricular_units_1st_sem_approved = joblib.load('model/scaler_Curricular_units_1st_sem_approved.joblib')
+scaler_Curricular_units_1st_sem_grade = joblib.load('model/scaler_Curricular_units_1st_sem_grade.joblib')
+scaler_Curricular_units_2nd_sem_approved = joblib.load('model/scaler_Curricular_units_2nd_sem_approved.joblib')
+scaler_Curricular_units_2nd_sem_grade = joblib.load('model/scaler_Curricular_units_2nd_sem_grade.joblib')
+scaler_Previous_qualification_grade = joblib.load('model/scaler_Previous_qualification_grade.joblib')
 
 pca_numerical_columns = [
     'Age_at_enrollment',
@@ -35,6 +35,9 @@ pca_numerical_columns = [
     'Curricular_units_2nd_sem_grade',
     'Previous_qualification_grade'
 ]
+
+# Define the correct order of columns for one-hot encoding
+onehot_encoded_cols = ['Marital_status', 'Course', 'Previous_qualification']
 
 def data_preprocessing(data):
     """Preprocessing data
@@ -46,26 +49,85 @@ def data_preprocessing(data):
         Pandas DataFrame: Dataframe that contain all the preprocessed data
     """
     data = data.copy()
-    df = pd.DataFrame()
+    df_processed = pd.DataFrame()
 
-    df['Course'] = encoder_Course.transform(data['Course'])
-    df['Daytime/evening attendance'] = encoder_Daytime_evening_attendance.transform(data['Daytime/evening attendance'])
-    df['Fathers_occupation'] = encoder_Fathers_occupation.transform(data['Fathers_occupation'])
-    df['Fathers_qualification'] = encoder_Fathers_qualification.transform(data['Fathers_qualification'])
-    df['Gender'] = encoder_Gender.transform(data['Gender'])
-    df['Marital_status'] = encoder_Marital_status.transform(data['Marital_status'])
-    df['Mothers_occupation'] = encoder_Mothers_occupation.transform(data['Mothers_occupation'])
-    df['Mothers_qualification'] = encoder_Mothers_qualification.transform(data['Mothers_qualification'])
-    df['Previous_qualification'] = encoder_Previous_qualification.transform(data['Previous_qualification'])
-    df['Scholarship_holder'] = encoder_Scholarship_holder.transform(data['Scholarship_holder'])
+    # Handle NaNs in numerical columns
+    for col in pca_numerical_columns:
+        if data[col].isnull().any():
+            print(f"NaNs found in {col} before imputation.")
+            data[col] = data[col].fillna(0 if len(data) == 1 else data[col].mean())
+            print(f"NaNs in {col} after imputation: {data[col].isnull().sum()}")
+        else:
+            print(f"No NaNs in {col} before imputation.")
 
-    # PCA
-    data['Age_at_enrollment'] = scaler_Age_at_enrollment.transform(np.asarray(data['Age_at_enrollment']).reshape(-1,1))[0]
-    data['Curricular_units_1st_sem_approved'] = scaler_Curricular_units_1st_sem_approved.transform(np.asarray(data['Curricular_units_1st_sem_approved']).reshape(-1,1))[0]
-    data['Curricular_units_1st_sem_grade'] = scaler_Curricular_units_1st_sem_grade.transform(np.asarray(data['Curricular_units_1st_sem_grade']).reshape(-1,1))[0]
-    data['Curricular_units_2nd_sem_approved'] = scaler_Curricular_units_2nd_sem_approved.transform(np.asarray(data['Curricular_units_2nd_sem_approved']).reshape(-1,1))[0]
-    data['Curricular_units_2nd_sem_grade'] = scaler_Curricular_units_2nd_sem_grade.transform(np.asarray(data['Curricular_units_2nd_sem_grade']).reshape(-1,1))[0]
-    data['Previous_qualification_grade'] = scaler_Previous_qualification_grade.transform(np.asarray(data['Previous_qualification_grade']).reshape(-1,1))[0]
-    df[pca_numerical_columns] = pca_1.transform(data[pca_numerical_columns])
+    # Scale numerical features
+    scaler_dict = {
+        'Age_at_enrollment': scaler_Age_at_enrollment,
+        'Curricular_units_1st_sem_approved': scaler_Curricular_units_1st_sem_approved,
+        'Curricular_units_1st_sem_grade': scaler_Curricular_units_1st_sem_grade,
+        'Curricular_units_2nd_sem_approved': scaler_Curricular_units_2nd_sem_approved,
+        'Curricular_units_2nd_sem_grade': scaler_Curricular_units_2nd_sem_grade,
+        'Previous_qualification_grade': scaler_Previous_qualification_grade,
+    }
 
-    return df
+    scaled_data = data[pca_numerical_columns].copy()
+    for col in pca_numerical_columns:
+        scaled_data[col] = scaler_dict[col].transform(scaled_data[[col]])
+
+   # One-hot encode categorical features
+    encoded_data = onehot_encoder.transform(data[onehot_encoded_cols])
+    encoded_cols = onehot_encoder.get_feature_names_out(onehot_encoded_cols)
+    encoded_df = pd.DataFrame(encoded_data, columns=encoded_cols, index=data.index)
+
+    # Concatenate the encoded columns with the original DataFrame (excluding the original categorical columns)
+    df_processed = pd.concat([data.drop(columns=onehot_encoded_cols), encoded_df], axis=1)
+
+   # Encode the other categorical features
+    df_processed['Daytime_evening_attendance'] = encoder_Daytime_evening_attendance.transform(df_processed['Daytime_evening_attendance'])
+    df_processed['Fathers_occupation'] = encoder_Fathers_occupation.transform(df_processed['Fathers_occupation'])
+    df_processed['Fathers_qualification'] = encoder_Fathers_qualification.transform(df_processed['Fathers_qualification'])
+    df_processed['Gender'] = encoder_Gender.transform(df_processed['Gender'])
+    df_processed['Mothers_occupation'] = encoder_Mothers_occupation.transform(df_processed['Mothers_occupation'])
+    df_processed['Mothers_qualification'] = encoder_Mothers_qualification.transform(df_processed['Mothers_qualification'])
+    df_processed['Scholarship_holder'] = encoder_Scholarship_holder.transform(df_processed['Scholarship_holder'])
+    
+   # Get the expected PCA input features
+    expected_pca_features = list(pca_1.feature_names_in_)
+
+    # Ensure all expected PCA input features are present
+    missing_cols_pca = [col for col in expected_pca_features if col not in df_processed.columns]
+    if missing_cols_pca:
+        raise ValueError(f"Missing columns for PCA: {missing_cols_pca}")
+
+    X_pca_input = df_processed[expected_pca_features].copy()
+    pca_transformed = pca_1.transform(X_pca_input)
+
+    pca_columns = ['pc1_1', 'pc1_2', 'pc1_3']
+    pca_df = pd.DataFrame(pca_transformed, index=df_processed.index, columns=pca_columns)
+
+    # Concatenate the DataFrames, excluding original PCA columns from 'df'
+    df_processed = pd.concat([df_processed, pca_df], axis=1)
+    df_processed = df_processed.drop(columns=pca_numerical_columns, errors='ignore')
+
+    # Ensure the column order matches the training data
+    correct_column_order = [
+        'Daytime_evening_attendance', 'Mothers_qualification', 'Fathers_qualification',
+        'Mothers_occupation', 'Fathers_occupation', 'Gender', 'Scholarship_holder',
+        'Marital_status_1', 'Marital_status_2', 'Marital_status_3', 'Marital_status_4',
+        'Marital_status_5', 'Marital_status_6', 'Previous_qualification_1',
+        'Previous_qualification_2', 'Previous_qualification_3', 'Previous_qualification_4',
+        'Previous_qualification_5', 'Previous_qualification_6', 'Previous_qualification_9',
+        'Previous_qualification_10', 'Previous_qualification_12', 'Previous_qualification_14',
+        'Previous_qualification_15', 'Previous_qualification_19', 'Previous_qualification_38',
+        'Previous_qualification_39', 'Previous_qualification_40', 'Previous_qualification_42',
+        'Previous_qualification_43', 'Course_33', 'Course_171', 'Course_8014', 'Course_9003',
+        'Course_9070', 'Course_9085', 'Course_9119', 'Course_9130', 'Course_9147', 'Course_9238',
+        'Course_9254', 'Course_9500', 'Course_9556', 'Course_9670', 'Course_9773', 'Course_9853',
+        'Course_9991', 'pc1_1', 'pc1_2', 'pc1_3'
+    ]
+    df_processed = df_processed.reindex(columns=correct_column_order)
+
+    print("--- Final Data Info (after reindexing) ---")
+    print("Shape of df:", df_processed.shape)
+    print("Final data columns:\n", df_processed.columns)
+    return df_processed
