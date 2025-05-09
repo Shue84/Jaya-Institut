@@ -100,7 +100,7 @@ with col1:
         10: '11th year of schooling - not completed',
         11: '7th Year (Old)',
         12: 'Other - 11th year of schooling',
-        13: '2nd year complementary high school course'
+        13: '2nd year complementary high school course',
         14: '10th year of schooling',
         18: 'General commerce course',
         19: 'Basic Education 3rd Cycle (9th/10th/11th Year) or Equiv.',
